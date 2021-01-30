@@ -1,17 +1,22 @@
-package ru.skillbranch.skillarticles
+package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
+import kotlinx.android.synthetic.main.layout_bottombar.*
+import kotlinx.android.synthetic.main.layout_submenu.*
+import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
+import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
 
 class RootActivity : AppCompatActivity() {
     private lateinit var viewModel: ArticleViewModel
@@ -22,7 +27,7 @@ class RootActivity : AppCompatActivity() {
         setupToolbar()
         setupBottomBar()
         setupSubmenu()
-        val vmFactory = ViewModeFactory("0")
+        val vmFactory = ViewModelFactory("0")
         viewModel = ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
         viewModel.observeState(this) {
             renderUi(it)
@@ -37,12 +42,14 @@ class RootActivity : AppCompatActivity() {
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        val logo = if (toolbar.childCount > 2) toolbar.getChildAt(2) as ImageView else null
+        val logo = if (toolbar.childCount > 2) toolbar.getChildAt(2) as AppCompatImageView else null
         logo?.scaleType = ImageView.ScaleType.CENTER_CROP
-        (logo?.layoutParams as? Toolbar.LayoutParams)?.let {
-            it.width = dpToIntPx(40)
-            it.height = dpToIntPx(40)
-            it.marginEnd = dpToIntPx(16)
+        logo?.adjustViewBounds = true
+        val lp = logo?.layoutParams as? Toolbar.LayoutParams
+        lp?.let {
+            it.width = this.dpToIntPx(40)
+            it.height = this.dpToIntPx(40)
+            it.marginEnd = this.dpToIntPx(16)
             logo.layoutParams = it
         }
     }
@@ -75,11 +82,12 @@ class RootActivity : AppCompatActivity() {
         // bind toolbar
         toolbar.title = data.title ?: "Skill Articles"
         toolbar.subtitle = data.category ?: "loading..."
-        if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as int)
+        if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
     }
 
     private fun renderNotification(notify: Notify) {
         val snackbar = Snackbar.make(coordinator_container, notify.message, Snackbar.LENGTH_LONG)
+                .setAnchorView(bottombar)
         when (notify) {
             is Notify.TextMessage -> {/* nothing */
             }
@@ -95,7 +103,7 @@ class RootActivity : AppCompatActivity() {
                     setTextColor(getColor(android.R.color.white))
                     setActionTextColor(getColor(android.R.color.white))
                     setAction(notify.errLabel) {
-                        notify.errHandler.invoke()
+                        notify.errHandler?.invoke()
                     }
                 }
             }
@@ -113,6 +121,6 @@ class RootActivity : AppCompatActivity() {
     private fun setupSubmenu() {
         btn_text_up.setOnClickListener { viewModel.handleUpText() }
         btn_text_down.setOnClickListener { viewModel.handleDownText() }
-        swith_mode.setOnClickListener { viewModel.handleNightMode() }
+        switch_mode.setOnClickListener { viewModel.handleNightMode() }
     }
 }

@@ -27,6 +27,14 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
             )
         }
 
+        subscribeOnDataSource(getArticleContent()) { content, state ->
+            content ?: return@subscribeOnDataSource null
+            state.copy(
+                    isLoadingContent = false,
+                    content = content
+            )
+        }
+
         subscribeOnDataSource(getArticlePersonalInfo()) { info, state ->
             info ?: return@subscribeOnDataSource null
             state.copy(
@@ -54,6 +62,10 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         return repository.getArticle(articleId)
     }
 
+    private fun getArticlePersonalInfo():LiveData<ArticlePersonalInfo?> {
+        return repository.loadArticlePersonalInfo(articleId)
+    }
+
     //session state
     fun handleToggleMenu() {
         updateState { state ->
@@ -76,7 +88,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     // personal article info
-    override fun handleBookmark() {
+   /* override*/ fun handleBookmark() {
         val info = currentState.toArticlePersonalInfo()
         repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
 
@@ -84,7 +96,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         notify(Notify.TextMessage(msg))
     }
 
-    override fun handleLike() {
+    /*override*/ fun handleLike() {
         Log.e("ArticleViewModel", "handle like: ")
         val isLiked = currentState.isLike
         val toggleLike = {
@@ -103,7 +115,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         notify(msg)
     }
 
-    override fun handleShare() {
+    /*override*/ fun handleShare() {
         val msg = "Share is not implemented"
         notify(Notify.ErrorMessage(msg, "OK", null))
     }
