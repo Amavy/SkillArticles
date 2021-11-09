@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Skill Articles</string>
+    <string name="article_search_placeholder">Search</string>
+    <string name="bb_search_not_found">Not found</string>
 </resources>
